@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Developer Console</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #devConsole {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            padding: 10px;
+            background: black;
+            color: lime;
+            border: 1px solid lime;
+            font-family: monospace;
+            outline: none;
+            display: none;
+        }
+
+        #consoleOutput {
+            position: fixed;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #222;
+            color: white;
+            border: 1px solid lime;
+            font-family: monospace;
+            display: none;
+        }
+
+        .treasure {
+            font-size: 50px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the Hybrid Playground</h1>
+    <p>Press <strong>` (Tilde Key)</strong> to open the Developer Console.</p>
+
+    <input type="text" id="devConsole" placeholder="Type secret commands...">
+    <div id="consoleOutput"></div>
+    <div id="treasure" class="treasure">💎</div>
+
+    <script>
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "`") { // Opens console on tilde key (~)
+                let consoleInput = document.getElementById("devConsole");
+                let outputDiv = document.getElementById("consoleOutput");
+                consoleInput.style.display = "block";
+                outputDiv.style.display = "block";
+                consoleInput.focus();
+            }
+        });
+
+        document.getElementById("devConsole").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                let command = event.target.value.trim();
+                let outputDiv = document.getElementById("consoleOutput");
+                try {
+                    let result = eval(command);
+                    outputDiv.innerHTML += `<div>> ${command}</div>`;
+                    outputDiv.innerHTML += `<div style='color: lime;'>${result}</div>`;
+                } catch (error) {
+                    outputDiv.innerHTML += `<div style='color: red;'>Error: ${error}</div>`;
+                }
+                event.target.value = "";
+            }
+        });
+    </script>
+</body>
+</html>

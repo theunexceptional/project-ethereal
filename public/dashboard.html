@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #1e1e1e;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #333;
+            padding: 10px 20px;
+        }
+        .header h1 { margin: 0; }
+        .logout-btn {
+            background: red;
+            border: none;
+            padding: 10px 15px;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .login-btn {
+            background: green;
+            border: none;
+            padding: 10px 15px;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .content {
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Welcome to Your Dashboard</h1>
+        <div>
+            <button class="login-btn" onclick="login()">Login</button>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+    <div class="content">
+        <h2>Hello, User! 🎉</h2>
+        <p>This is your personalized dashboard.</p>
+    </div>
+    <div id="achievements-container">
+        <h2>🏆 Unlocked Achievements</h2>
+        <ul id="achievements-list"></ul>
+    </div>
+    
+
+    <script>
+        function login() {
+            window.location.href = '/login.html';
+        }
+
+        function logout() {
+            fetch('http://localhost:5000/logout', { method: 'POST', credentials: 'include' })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Logged out successfully!');
+                    window.location.href = '/';
+                })
+                .catch(error => console.error('Logout error:', error));
+        }
+
+        async function fetchAchievements() {
+            const username = localStorage.getItem("username");
+
+            if (!username) {
+                console.log("❌ No username found in local storage.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/achievements/${username}`);
+                const achievements = await response.json();
+
+                console.log("✅ Achievements fetched:", achievements); // DEBUGGING OUTPUT
+
+                const list = document.getElementById("achievements-list");
+
+                if (!list) {
+                    console.error("❌ achievements-list element not found in HTML!");
+                    return;
+                }
+
+                list.innerHTML = ""; // Clear previous content
+
+                if (achievements.length === 0) {
+                    list.innerHTML = "<li>😢 No achievements unlocked yet!</li>";
+                    return;
+                }
+
+                achievements.forEach(ach => {
+                    const item = document.createElement("li");
+                    item.textContent = `🏅 ${ach.name} - ${ach.description}`;
+                    list.appendChild(item);
+                });
+
+            } catch (error) {
+                console.error("🔥 Error fetching achievements:", error);
+            }
+        }
+
+        // Call function when page loads
+        document.addEventListener("DOMContentLoaded", fetchAchievements);
+
+    </script>
+</body>
+</html>

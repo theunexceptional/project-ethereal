@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Achievements</title>
+    <link rel="stylesheet" href="achievements.css">
+</head>
+<body>
+    <h1>🏆 Your Achievements</h1>
+    <div id="achievement-list">Loading...</div>
+
+    <script>
+        fetch("/api/achievements", { credentials: "include" })
+            .then(response => response.json())
+            .then(data => {
+                const list = document.getElementById("achievement-list");
+                list.innerHTML = "";
+                data.achievements.forEach(ach => {
+                    const item = document.createElement("div");
+                    item.classList.add("achievement");
+                    item.innerHTML = `<h3>${ach.name}</h3><p>${ach.description}</p>`;
+                    list.appendChild(item);
+                });
+            })
+            .catch(() => document.getElementById("achievement-list").innerHTML = "⚠️ Failed to load achievements");
+    </script>
+</body>
+</html>
