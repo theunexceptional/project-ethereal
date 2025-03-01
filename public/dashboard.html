@@ -84,10 +84,17 @@
             }
 
             try {
+                console.log(`🔍 Fetching achievements for: ${username}`);
+
                 const response = await fetch(`http://localhost:5000/api/achievements/${username}`);
                 const achievements = await response.json();
 
-                console.log("✅ Achievements fetched:", achievements); // DEBUGGING OUTPUT
+                if (achievements.error) {
+                    console.error("❌ Server error:", achievements.error);
+                    return;
+                }
+
+                console.log("✅ Achievements fetched:", achievements);
 
                 const list = document.getElementById("achievements-list");
 

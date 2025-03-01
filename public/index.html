@@ -4,112 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hybrid Code Playground</title>
-    <link rel="stylesheet" href="achievements.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css"> <!-- External CSS for better management -->
     <script src="achievements.js"></script>
-
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            transition: background-color 0.3s, color 0.3s;
-            margin: 0;
-            padding: 0;
-        }
-        /* Themes */
-        .dark-mode { background-color: #1e1e1e; color: white; }
-        .light-mode { background-color: #ffffff; color: black; }
-        .cyberpunk-mode { background-color: #0f0f0f; color: #0ff; font-family: 'Courier New', monospace; }
-        .interstellar-mode { background-color: #000033; color: #fffacd; }
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 98%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            background: #333;
-            color: white;
-            z-index: 1000;
-        }
-        .header button { background: #555; color: white; border: none; padding: 8px 16px; cursor: pointer; border-radius: 8px; transition: background 0.3s; }
-        .header button:hover { background: #444; }
-        .container { margin-top: 60px; text-align: center; }
-        .editor-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 20px;
-            width: 90%;
-            flex-wrap: wrap;
-        }
-        textarea {
-            width: 30%;
-            height: 200px;
-            font-family: monospace;
-            background: black;
-            color: white;
-            border: 1px solid white;
-            padding: 10px;
-            resize: both;
-            min-width: 200px;
-            border-radius: 6px;
-        }
-        .output-container { display: flex; justify-content: center; width: 90%; }
-        iframe { width: 90%; height: 300px; border: 1px solid white; background: white; }
-
-        /* Login Form */
-        .login-popup {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #222;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-            text-align: center;
-            width: 300px;
-        }
-        .login-popup input {
-            width: 90%;
-            padding: 10px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 5px;
-            background: #333;
-            color: white;
-        }
-        .login-popup button {
-            width: 100%;
-            padding: 10px;
-            background: #007BFF;
-            border: none;
-            color: white;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .login-popup button:hover { background: #0056b3; }
-        .login-popup .close-btn {
-            background: red;
-            margin-top: 10px;
-        }
-    </style>
 </head>
-<body>
-    <div class="header">
+<body class="dark-mode">
+    <header class="header">
         <h1>Hybrid Code Playground</h1>
-        <div>
-            <button id="themeToggle">Change Theme</button>
-            <button id="autoRefreshToggle">Auto-Refresh: ON</button>
-            <button id="clearAll">Clear All</button>
-            <button id="loginBtn">Login</button> <!-- 🔹 Login Button -->
+        <div class="header-buttons">
+            <button id="themeToggle">🎨 Theme</button>
+            <button id="autoRefreshToggle">🔄 Auto-Refresh: ON</button>
+            <button id="clearAll">🗑️ Clear All</button>
+            <button id="loginBtn">🔑 Login</button>
         </div>
-    </div>
-    <div class="container">
-        <p>Write code in the boxes below, and it will execute automatically!</p>
+    </header>
+    <main class="container">
+        <p class="description">Write your code below and see it execute in real-time! 🚀</p>
         <div class="editor-container">
             <textarea id="htmlCode" placeholder="Write HTML here..."></textarea>
             <textarea id="cssCode" placeholder="Write CSS here..."></textarea>
@@ -118,9 +28,9 @@
         <div class="output-container">
             <iframe id="output" title="Code Output"></iframe>
         </div>
-    </div>
-
-    <!-- 🔹 Login Popup -->
+    </main>
+    
+    <!-- Login Popup -->
     <div id="loginPopup" class="login-popup">
         <h2>Login</h2>
         <input type="text" id="username" placeholder="Username" required>
@@ -129,42 +39,7 @@
         <button class="close-btn" onclick="closeLoginPopup()">Close</button>
         <p id="message"></p>
     </div>
-
-    <script>
-        let autoRefresh = true;
-        window.onload = function() {
-            let savedTheme = localStorage.getItem("theme");
-            if (savedTheme) document.body.classList.add(savedTheme);
-            else document.body.classList.add("dark-mode");
-            updateOutput();
-        };
-        document.getElementById("themeToggle").addEventListener("click", function() {
-            let themes = ["dark-mode", "light-mode", "cyberpunk-mode", "interstellar-mode"];
-            let currentTheme = document.body.classList[0];
-            let nextTheme = themes[(themes.indexOf(currentTheme) + 1) % themes.length];
-            document.body.className = nextTheme;
-            localStorage.setItem("theme", nextTheme);
-        });
-        function updateOutput() {
-            if (!autoRefresh) return;
-            let html = document.getElementById("htmlCode").value;
-            let css = "<style>" + document.getElementById("cssCode").value + "</style>";
-            let js = "<script>" + document.getElementById("jsCode").value + "<\/script>";
-            let outputFrame = document.getElementById("output").contentWindow.document;
-            outputFrame.open();
-            outputFrame.write(html + css + js);
-            outputFrame.close();
-        }
-        document.querySelectorAll("textarea").forEach(area => area.addEventListener("input", updateOutput));
-
-        // 🔹 Login Popup Logic
-        document.getElementById("loginBtn").addEventListener("click", function() {
-            document.getElementById("loginPopup").style.display = "block";
-        });
-        function closeLoginPopup() {
-            document.getElementById("loginPopup").style.display = "none";
-        }
-    </script>
+    <script src="script.js"></script> <!-- External JS for better organization -->
     <script src="login.js"></script>
 </body>
 </html>

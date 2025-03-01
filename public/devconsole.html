@@ -58,31 +58,6 @@
     <div id="consoleOutput"></div>
     <div id="treasure" class="treasure">💎</div>
 
-    <script>
-        document.addEventListener("keydown", function(event) {
-            if (event.key === "`") { // Opens console on tilde key (~)
-                let consoleInput = document.getElementById("devConsole");
-                let outputDiv = document.getElementById("consoleOutput");
-                consoleInput.style.display = "block";
-                outputDiv.style.display = "block";
-                consoleInput.focus();
-            }
-        });
-
-        document.getElementById("devConsole").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                let command = event.target.value.trim();
-                let outputDiv = document.getElementById("consoleOutput");
-                try {
-                    let result = eval(command);
-                    outputDiv.innerHTML += `<div>> ${command}</div>`;
-                    outputDiv.innerHTML += `<div style='color: lime;'>${result}</div>`;
-                } catch (error) {
-                    outputDiv.innerHTML += `<div style='color: red;'>Error: ${error}</div>`;
-                }
-                event.target.value = "";
-            }
-        });
-    </script>
+    <script src="devconsole.js"></script>
 </body>
 </html>

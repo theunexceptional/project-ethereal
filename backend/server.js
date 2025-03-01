@@ -8,7 +8,7 @@ const cors = require("cors");
 const path = require("path");
 
 const connectDB = require("./database");
-const User = require("./models/user"); // ✅ Import user model
+const User = require("./models/user");
 
 const JWT_SECRET = process.env.JWT_SECRET || "98217737";
 const PORT = process.env.PORT || 5000;
@@ -20,12 +20,11 @@ const app = express();
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(cookieParser());
-app.use("/api/achievements", require("./routes/achievementRoutes"));
 
 // Connect to MongoDB
 connectDB();
 
-// Serve static files (✅ Moved after initializing `app`)
+// Serve static files
 app.use(express.static(path.join(__dirname, "../public")));
 
 // Landing page route
@@ -38,55 +37,53 @@ app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/code", require("./routes/codeRoutes"));
 app.use("/api/achievements", require("./routes/achievementRoutes"));
 
-// Signup Route
-app.post("/signup", async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ error: "All fields required" });
-
-  const hashedPassword = await bcrypt.hash(password, 10);
+// ✅ Signup Route
+app.post("/api/signup", async (req, res) => {
   try {
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: "All fields required" });
+
+    const existingUser = await User.findOne({ username });
+    if (existingUser) return res.status(400).json({ error: "User already exists" });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({ username, password: hashedPassword });
     await newUser.save();
+
     res.json({ message: "User registered successfully" });
   } catch (err) {
-    res.status(500).json({ error: "User already exists or server error" });
+    console.error("Signup Error:", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-// Login Route
-app.post("/login", async (req, res) => {
+// ✅ Login Route
+app.post("/api/login", async (req, res) => {
   try {
     const { username, password } = req.body;
     
-    // Find user
     const user = await User.findOne({ username });
     if (!user) return res.status(400).json({ error: "User not found" });
 
-    // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log("Password Match:", isMatch); // 🔍 Debugging line
-    
     if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
-    // Generate Token
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "1h" });
 
-    // Set Cookie
     res.cookie("token", token, { 
       httpOnly: true, 
-      sameSite: "Lax", // Helps with cross-site issues
+      sameSite: "Lax",
     });
 
-    res.json({ message: "Login successful" });
-
+    res.json({ message: "Login successful", token });
   } catch (err) {
     console.error("Login Error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// Protected Route
-app.get("/protected", (req, res) => {
+// ✅ Protected Route
+app.get("/api/protected", (req, res) => {
   const token = req.cookies.token;
   if (!token) return res.status(401).json({ error: "Unauthorized" });
 

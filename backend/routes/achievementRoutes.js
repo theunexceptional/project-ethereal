@@ -4,35 +4,36 @@ const User = require("../models/user");
 
 const router = express.Router();
 
+// ✅ Unlock an achievement (using username instead of userId)
 router.post("/unlock", async (req, res) => {
     try {
-        const { userId, achievementName } = req.body;
-        console.log("🔍 Received Request - userId:", userId, "achievementName:", achievementName);
+        const { username, achievementName } = req.body;
+        console.log("🔍 Received Request - username:", username, "achievementName:", achievementName);
 
-        if (!userId || !achievementName) {
+        if (!username || !achievementName) {
             console.log("❌ Missing data");
-            return res.status(400).json({ error: "Missing userId or achievementName" });
+            return res.status(400).json({ error: "Missing username or achievementName" });
         }
 
-        // ❌ Instead of `findById(userId)`, use `findOne({ username: userId })`
-        const user = await User.findOne({ username: userId });
+        // ✅ Find user by username
+        const user = await User.findOne({ username });
         if (!user) {
             console.log("❌ User not found");
             return res.status(404).json({ error: "User not found" });
         }
 
-        // ✅ Now use `user._id` as the proper ObjectId
+        // ✅ Check if achievement already exists
         const existingAchievement = await Achievement.findOne({ userId: user._id, name: achievementName });
         if (existingAchievement) {
             console.log("⚠️ Achievement already unlocked");
             return res.status(400).json({ error: "Achievement already unlocked" });
         }
 
-        // Unlock achievement
+        // ✅ Unlock new achievement
         const newAchievement = new Achievement({
             userId: user._id,
             name: achievementName,
-            description: `Unlocked achievement: ${achievementName}`, // ✅ Fix: Default description
+            description: `Unlocked achievement: ${achievementName}`,
         });
         await newAchievement.save();
         console.log("✅ Achievement unlocked successfully");
@@ -45,26 +46,27 @@ router.post("/unlock", async (req, res) => {
     }
 });
 
-// 📌 Get all achievements for a user
-router.get("/:userId", async (req, res) => {
-  try {
-      const { userId } = req.params;
-      console.log("🔍 Fetching achievements for user:", userId);
+// ✅ Get achievements by username
+router.get("/:username", async (req, res) => {
+    try {
+        const { username } = req.params;
+        console.log("🔍 Fetching achievements for user:", username);
 
-      const user = await User.findOne({ username: userId }); // ✅ Match by username
-      if (!user) {
-          console.log("❌ User not found");
-          return res.status(404).json({ error: "User not found" });
-      }
+        // ✅ Find user by username
+        const user = await User.findOne({ username });
+        if (!user) {
+            console.log("❌ User not found");
+            return res.status(404).json({ error: "User not found" });
+        }
 
-      const achievements = await Achievement.find({ userId: user._id });
-      res.json(achievements);
+        // ✅ Fetch achievements using user._id
+        const achievements = await Achievement.find({ userId: user._id });
+        res.json(achievements);
 
-  } catch (err) {
-      console.error("🔥 Error fetching achievements:", err);
-      res.status(500).json({ error: "Server error", details: err.message });
-  }
+    } catch (err) {
+        console.error("🔥 Error fetching achievements:", err);
+        res.status(500).json({ error: "Server error", details: err.message });
+    }
 });
-
 
 module.exports = router;

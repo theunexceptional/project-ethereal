@@ -1,22 +1,26 @@
 async function login() {
     const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
+    if (!username) {
+        alert("Username is required!");
+        return;
+    }
 
-    const response = await fetch("http://localhost:5000/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-        credentials: "include" // Ensures cookies (JWT) are sent
-    });
+    try {
+        const response = await fetch("http://localhost:5000/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username })
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    if (response.ok) {
-        document.getElementById("message").innerText = "✅ Login successful!";
-        setTimeout(() => {
-            window.location.href = "/dashboard.html"; // Redirect after login
-        }, 1000);
-    } else {
-        document.getElementById("message").innerText = "❌ " + data.error;
+        if (data.success) {
+            localStorage.setItem("username", username);
+            window.location.href = "dashboard.html"; // Redirect to dashboard
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        console.error("Login failed:", error);
     }
 }
